@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id                  String                 @id @default(uuid()) @db.Uuid
+  email               String                 @unique
+  password            String
+  name                String
+  bio                 String?
+  age                 Int
+  gender              String
+  images              String[]
+  premium             Boolean                @default(false)
+  verified            Boolean                @default(false)
+  swipesLeft          Int                    @default(10)
+  lastSwipeReset      DateTime               @default(now())
+  swipesGiven         swipes[]               @relation("swipes_given_user")
+  swipesReceived      swipes[]               @relation("swipes_received_user")
+  premiumSubscription premium_subscriptions?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+}
+
+model swipes {
+  id        String   @id @default(uuid()) @db.Uuid
+  swiperId  String   @db.Uuid
+  swipedId  String   @db.Uuid
+  liked     Boolean
+  createdAt DateTime @default(now())
+  swiper    users    @relation("swipes_given_user", fields: [swiperId], references: [id])
+  swiped    users    @relation("swipes_received_user", fields: [swipedId], references: [id])
+}
+
+model premium_subscriptions {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @db.Uuid
+  user      users    @relation(fields: [userId], references: [id])
+  type      String // 'MONTHLY', 'YEARLY'
+  startDate DateTime @default(now())
+  endDate   DateTime
+  createdAt DateTime @default(now())
+}
