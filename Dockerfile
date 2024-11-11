@@ -1,5 +1,5 @@
 # Use a Node image with your preferred version
-FROM node:16
+FROM node:18
 
 # Set the working directory in the container
 WORKDIR /app
@@ -10,8 +10,8 @@ COPY package.json pnpm-lock.yaml ./
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Install dependencies
-RUN pnpm install
+# Install dependencies, including devDependencies for the build step
+RUN pnpm install --prod=false
 
 # Copy the rest of your code
 COPY . .

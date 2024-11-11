@@ -54,6 +54,14 @@ export class SwipesService {
       throw new BadRequestException('Daily swipe limit reached');
     }
 
+    const target = await this.prisma.users.findUnique({
+      where: { id: swipedId },
+    });
+
+    if (!target) {
+      throw new BadRequestException(`Target profile doens't exists`);
+    }
+
     await this.prisma.swipes.create({
       data: {
         swiperId,
